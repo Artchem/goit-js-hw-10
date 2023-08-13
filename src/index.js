@@ -13,7 +13,7 @@ API.fetchBreeds()
   .then(data => {
     console.log(data);
 
-    refs.breedSelect.innerHTML = pushDataSelect(data);
+    refs.breedSelect.innerHTML = pushDataInSelect(data);
 
     refs.breedSelect.classList.remove('is-hidden');
     refs.loader.classList.add('is-hidden');
@@ -23,7 +23,7 @@ API.fetchBreeds()
     });
   })
   .catch(error => {
-    // console.log(error.message);
+    console.log(error.message);
     Notiflix.Notify.failure(`Oops! ${error.message}! Try reloading the page!`, {
       width: '380px',
       position: 'center-center',
@@ -34,7 +34,7 @@ API.fetchBreeds()
     refs.loader.classList.add('is-hidden');
   });
 
-function pushDataSelect(array) {
+function pushDataInSelect(array) {
   return array
     .map(({ id, name }) => `<option  value="${id}">${name}</option>`)
     .join('');
@@ -55,7 +55,7 @@ function onBreedClick(evt) {
       refs.loader.classList.add('is-hidden');
     })
     .catch(error => {
-      // console.dir(error);
+      console.dir(error.message);
       Notiflix.Notify.failure(
         `Oops! ${error.message}! Try reloading the page!`,
         {
