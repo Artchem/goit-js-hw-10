@@ -1,22 +1,89 @@
-// import axios from 'axios';
+import * as API from './js/cat-api';
+import SlimSelect from 'slim-select';
+import Notiflix from 'notiflix';
 
-// axios.defaults.headers.common['x-api-key'] =
-//   'live_Nn1VsEsOxvKXUEDZgJ1Ozas6fp5FWjakqenWEpD7mkWJC14l0f27DWhxmAMxBpJz';
+const refs = {
+  breedSelect: document.querySelector('.breed-select'),
+  catInfo: document.querySelector('.cat-info'),
+  loader: document.querySelector('.loader'),
+  error: document.querySelector('.error'),
+};
 
-const API_KEY =
-  'live_Nn1VsEsOxvKXUEDZgJ1Ozas6fp5FWjakqenWEpD7mkWJC14l0f27DWhxmAMxBpJz';
+API.fetchBreeds()
+  .then(data => {
+    console.log(data);
 
-fetch('https://api.thecatapi.com/v1/breeds?api_key=API_KEY')
-  .then(response => {
-    console.log(response.json());
+    refs.breedSelect.innerHTML = pushDataSelect(data);
 
-    return response;
-  })
-  .then(cat => {
-    console.log(cat);
+    refs.breedSelect.classList.remove('is-hidden');
+    refs.loader.classList.add('is-hidden');
+
+    new SlimSelect({
+      select: refs.breedSelect,
+    });
   })
   .catch(error => {
-    console.log(error);
+    // console.log(error.message);
+    Notiflix.Notify.failure(`Oops! ${error.message}! Try reloading the page!`, {
+      width: '380px',
+      position: 'center-center',
+      timeout: 6000,
+      clickToClose: true,
+    });
+
+    refs.loader.classList.add('is-hidden');
   });
 
-// console.log(r);
+function pushDataSelect(array) {
+  return array
+    .map(({ id, name }) => `<option  value="${id}">${name}</option>`)
+    .join('');
+}
+
+refs.breedSelect.addEventListener('change', onBreedClick);
+
+function onBreedClick(evt) {
+  const searchBread = evt.target.value;
+
+  refs.loader.classList.remove('is-hidden');
+
+  refs.catInfo.innerHTML = '';
+
+  API.fetchCatByBreed(searchBread)
+    .then(data => {
+      refs.catInfo.innerHTML = createMarkup(data);
+      refs.loader.classList.add('is-hidden');
+    })
+    .catch(error => {
+      // console.dir(error);
+      Notiflix.Notify.failure(
+        `Oops! ${error.message}! Try reloading the page!`,
+        {
+          width: '380px',
+          position: 'center-center',
+          timeout: 6000,
+          clickToClose: true,
+        }
+      );
+      // refs.error.classList.remove('is-hidden');
+      refs.loader.classList.add('is-hidden');
+      // refs.breedSelect.classList.add('is-hidden');
+    });
+}
+
+function createMarkup(arr) {
+  return arr
+    .map(
+      ({ breeds: [{ name, description, temperament }], url }) =>
+        `<li class="card-info">
+        <img src="${url}" alt="" width="350">
+        <div class="info">
+          <h2>${name}</h2>
+          <p>${description}</p>
+          <p><span class="temperament">Temperament:</span> ${temperament}</p>
+        </div>
+        
+      </li>`
+    )
+    .join('');
+}
