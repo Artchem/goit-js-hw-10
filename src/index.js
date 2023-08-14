@@ -51,6 +51,13 @@ function onBreedClick(evt) {
 
   API.fetchCatByBreed(searchBread)
     .then(data => {
+      if (data.length === 0) {
+        Notiflix.Notify.failure(`Oops! There is no such cat. Choose another!`, {
+          width: '380px',
+          position: 'center-center',
+        });
+        console.log('Такого кота немає');
+      }
       refs.catInfo.innerHTML = createMarkup(data);
       refs.loader.classList.add('is-hidden');
     })
